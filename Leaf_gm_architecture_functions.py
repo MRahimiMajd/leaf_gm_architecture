@@ -83,6 +83,7 @@ def RF_with_spilit(comb_df,ensemble,minimum_data):
     ----------
     comb_df : Pandas DataFrame
         The dataframe with specified PFT contains the column 'gm' and a column for each trait in the combination.
+        Note: The first column necesserily must be for 'gm'.
     ensemble : integer
         The number of repeats of the model with a different random_state.
     minimum_data : integer
@@ -106,8 +107,8 @@ def RF_with_spilit(comb_df,ensemble,minimum_data):
         res={'R2': np.nan,'R2_err': np.nan,'R2_adj': np.nan,'R2_adj_err': np.nan,
              'r': np.nan,'r_err': np.nan,'importances': np.nan}
     else:
-        X= np.array(comb_df.values.tolist())[:,1:] #?
-        y= np.array(comb_df.values.tolist())[:,0] #?
+        X= np.array(comb_df.values)[:,1:] 
+        y= np.array(comb_df.values)[:,0] 
         ###
         r2s=[]
         r2_adjs=[]
@@ -121,8 +122,8 @@ def RF_with_spilit(comb_df,ensemble,minimum_data):
             r2=r2_score(y_test, y_pred)
             r2s.append(r2)
             ####
-            r2_adj= 1 - (((1 - r2) * (X_test.shape[0] - 1)) / (X_test.shape[0] - X_test.shape[1] - 1))#?
-            r2_adjs.append(r2_adj)#?
+            r2_adj= 1 - (((1 - r2) * (X_test.shape[0] - 1)) / (X_test.shape[0] - X_test.shape[1] - 1))
+            r2_adjs.append(r2_adj)
             ####
             corrs.append(stats.pearsonr(y_test, y_pred)[0])
             ####
@@ -138,8 +139,12 @@ def RF_with_train_and_test_data(comb_df_train,comb_df_test,ensemble,minimum_trai
     
     Parameters
     ----------
-    comb_df : Pandas DataFrame
-        The dataframe with specified PFT contains the column 'gm' and a column for each trait in the combination.
+    comb_df_train : Pandas DataFrame
+        The dataframe of train set with specified PFT contains the column 'gm' and a column for each trait in the combination.
+        Note: The first column necesserily must be for 'gm'. 
+    comb_df_tset : Pandas DataFrame
+        The dataframe of test set with specified PFT contains the column 'gm' and a column for each trait in the combination.
+        Note: The first column necesserily must be for 'gm'. 
     ensemble : integer
         The number of repeats of the model with a different random_state.
     minimum_train_data : integer
@@ -165,10 +170,10 @@ def RF_with_train_and_test_data(comb_df_train,comb_df_test,ensemble,minimum_trai
         res={'R2': np.nan,'R2_err': np.nan,'R2_adj': np.nan,'R2_adj_err': np.nan,
              'r': np.nan,'r_err': np.nan,'importances': np.nan}
     else:
-        X_train= np.array(comb_df_train.values.tolist())[:,1:] #?
-        y_train= np.array(comb_df_train.values.tolist())[:,0] #?
-        X_test= np.array(comb_df_test.values.tolist())[:,1:] #?
-        y_test= np.array(comb_df_test.values.tolist())[:,0] #?
+        X_train= np.array(comb_df_train.values)[:,1:] 
+        y_train= np.array(comb_df_train.values)[:,0] 
+        X_test= np.array(comb_df_test.values)[:,1:] 
+        y_test= np.array(comb_df_test.values)[:,0] 
         ###
         r2s=[]
         r2_adjs=[]
@@ -181,8 +186,8 @@ def RF_with_train_and_test_data(comb_df_train,comb_df_test,ensemble,minimum_trai
             r2=r2_score(y_test, y_pred)
             r2s.append(r2)
             ####
-            r2_adj= 1 - (((1 - r2) * (X_test.shape[0] - 1)) / (X_test.shape[0] - X_test.shape[1] - 1))#?
-            r2_adjs.append(r2_adj)#?
+            r2_adj= 1 - (((1 - r2) * (X_test.shape[0] - 1)) / (X_test.shape[0] - X_test.shape[1] - 1))
+            r2_adjs.append(r2_adj)
             ####
             corrs.append(stats.pearsonr(y_test, y_pred)[0])
             ####
@@ -275,7 +280,7 @@ def trait_pairs_correlation (df_agg,traita1, trait2):
     """
     df_of_traits=df_agg.loc[:,[traita1, trait2]].copy(deep=True)
     df_of_traits=df_of_traits.dropna(how='any')
-    traits_arr=df_of_traits.values
+    traits_arr=df_of_traits.to_numpy()
     correlation=stats.pearsonr(traits_arr[:,0],traits_arr[:,1])
     pearson_r=correlation[0]
     p_value = correlation[1]
@@ -636,6 +641,3 @@ def total_importances(df_of_results):
     ##############################
     return IMP_G, IMP_C    
 ###############################################################################
-
-
-
