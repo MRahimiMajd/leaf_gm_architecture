@@ -1,0 +1,24 @@
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.poetry]
+name = "leaf_gm_architecture"
+version = "0.1.0"
+description = "A Python package for analyzing plant functional types and traits."
+authors = ["Milad Rahimi Majd <milad.rahimi.majd@uni-potsdam.de>"]
+maintainers = ["Arne Neumann <leaf_gm_architecture.programming@arne.cl>"]
+
+[tool.poetry.dependencies]
+python = ">=3.11,<3.12"
+pandas = "1.5.3"
+numpy = "1.24.3"
+scikit-learn = "1.2.2"
+scipy = "1.10.1"
+openpyxl = "3.0.7"
+streamlit = "1.33.0"
+streamlit_option_menu = "0.3.12"
+pytest = "^8.0"
+
+[tool.poetry.extras]
+dev = []

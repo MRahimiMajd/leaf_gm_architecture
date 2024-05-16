@@ -1,23 +1,26 @@
 # leaf_gm_architecture
+
 This file contains the instructions for using the shared Python functions to reproduce the results presented in the Rahimi-Majd et al. paper.
 
-To run the functions, first, the Excell file of the dataset of Knauer et al. 2002 must be downloaded from the link: https://doi.org/10.6084/m9.figshare.19681410.v1 
-A copy of the used version of the data set in our analyses has been included in the files (gm_dataset_Knauer_et_al_2022.xlsx). 
+To run the functions, first clone this repo and change into the directory.
+Here you can run `pip install .` to install the code as a library.
+We recommended to install the software in a virtual environment,
+e.g. [using Python's venv module](https://realpython.com/python-virtual-environments-a-primer/)
+or [using conda](https://conda.io/projects/conda/en/latest/user-guide/getting-started.html).
+
+After installation, the code can be used as shown below. Additionally,
+we provide a basic web application that showcases the main functionality.
+It can be started this way:
+
+```
+streamlit run src/leaf_gm_architecture/streamlit_app.py 
+```
+
+A copy of the dataset (Knauer et al. 2002, https://doi.org/10.6084/m9.figshare.19681410.v1 )
+has been included in the files (gm_dataset_Knauer_et_al_2022.xlsx). 
 
 All the codes were written in Python and tested on version 3.11.3. 
-
-The required packages and the tested version of them are as follows:
-
-pandas 1.5.3
-
-numpy 1.24.3
-
-sklearn 1.2.2
-
-scipy 1.10.1
-
-itertools
-
+The required packages are listed in the `pyproject.toml` file.
 
 The data set contains more than 100 structural, anatomical, biochemical, and physiological traits, each provided in a separate column. In the paper, we used ten anatomical and structural traits as follows:
 
@@ -26,7 +29,9 @@ The data set contains more than 100 structural, anatomical, biochemical, and phy
 list_of_traits = ['LMA','T_mesophyll','fias_mesophyll','T_cw','T_cyt','T_chloroplast','Sm','Sc','T_leaf', 'D_leaf']
 ```
 
-The data set also was categorized into major plant functional types (PFTs) in the column 'plant_functional_type'. In our analyses, we used 13 PFTs from this column and five groups of them and a global set including all of the used PFTs. We identify each group or individual PFT by a list containing the names of the PFTs as follows:
+The data set also was categorized into major plant functional types (PFTs) in the column 'plant_functional_type'.
+In our analyses, we used 13 PFTs from this column and five groups of them and a global set including all of the used PFTs.
+We identify each group or individual PFT by a list containing the names of the PFTs as follows:
 
 ```
 PFTs = {'semi_deciduous_angiosperms':['semi-deciduous angiosperms'],
@@ -51,6 +56,7 @@ PFTs = {'semi_deciduous_angiosperms':['semi-deciduous angiosperms'],
   'evergreen gymnosperms','C4 annual herbaceous','fern allies','deciduous gymnosperms',
   'deciduous angiosperms','CAM plants','C3 annual herbaceous','C4 perennial herbaceous']}
 ```
+
 where the keys are arbitrary names for each group, and the values are the defined list for each PFT or group required in the functions.
 
 Having the trait(s) and PFT(s) of interest in the mentioned format, all the results of the paper can be reproduced by using the appropriate function from the file "Leaf_gm_architecture_functions.py". 
@@ -62,35 +68,14 @@ For example, to get the predictability scores and Gini importance of the traits 
 
 ```
 import pandas as pd
-import Leaf_gm_architecture_functions as gm
+import leaf_gm_architecture.functions as gm
 
 global_df = pd.read_excel('gm_dataset_Knauer_et_al_2022.xlsx', sheet_name='data')
 aggregated_df = gm.data_aggregation(global_df)
 combination_of_traits = ['T_cw','Sc','T_leaf', 'D_leaf']
 
-PFTs = {'semi_deciduous_angiosperms':['semi-deciduous angiosperms'],
-        'deciduous_gymnosperms':['deciduous gymnosperms'],
-        'woody_evergreen_angiosperms':['evergreen angiosperms'],
-        'C3_perennial_herbaceous':['C3 perennial herbaceous'],
-        'ferns':['ferns'], 
-        'C3_annual_herbaceous':['C3 annual herbaceous'],
-        'C4_annual_herbaceous':['C4 annual herbaceous'],
-        'C4_perennial_herbaceous':['C4 perennial herbaceous'],
-        'evergreen_gymnosperms':['evergreen gymnosperms'],
-        'CAM_plants':['CAM plants'],
-        'mosses':['mosses'],
-        'woody_deciduous_angiosperms':['deciduous angiosperms'],
-        'fern_allies':['fern allies'],
-        'C3_herbaceous':['C3 perennial herbaceous','C3 annual herbaceous'],
-        'C3_C4_herbaceous':['C4 annual herbaceous','C4 perennial herbaceous','C3 perennial herbaceous','C3 annual herbaceous'],
-        'woody_evergreens':['evergreen angiosperms','evergreen gymnosperms'],
-        'woody_angiosperms':['evergreen angiosperms','deciduous angiosperms','semi-deciduous angiosperms'],
-        'extended_ferns':['ferns', 'fern allies'],
-        'global_set':['C3 perennial herbaceous','evergreen angiosperms','ferns','mosses','semi-deciduous angiosperms',
-  'evergreen gymnosperms','C4 annual herbaceous','fern allies','deciduous gymnosperms',
-  'deciduous angiosperms','CAM plants','C3 annual herbaceous','C4 perennial herbaceous']}
-
-results=gm.CV_with_PFT_and_combination_of_interest(aggregated_df,PFTs['global_set'],combination_of_traits,enseble_size=50,min_rows=50)
+results, model = gm.CV_with_PFT_and_combination_of_interest(
+    aggregated_df, gm.PFTs['global_set'], combination_of_traits, ensemble_size=50, min_rows=50)
 
 """
 The ensemble number must be increased to get more accurate results.
@@ -103,13 +88,13 @@ As another example, to obtain the predictability scores and total importance of 
 
 ```
 import pandas as pd
-import Leaf_gm_architecture_functions as gm
+import leaf_gm_architecture.functions as gm
 
 global_df = pd.read_excel('gm_dataset_Knauer_et_al_2022.xlsx', sheet_name='data')
 aggregated_df = gm.data_aggregation(global_df)
 list_of_traits = ['LMA','T_mesophyll','fias_mesophyll','T_cw','T_cyt','T_chloroplast','Sm','Sc','T_leaf', 'D_leaf']
 
-table_of_results=gm.cross_prediction_global_PFT(aggregated_df,['ferns'],list_of_traits,enseble_size=5,
+table_of_results=gm.cross_prediction_global_PFT(aggregated_df,['ferns'],list_of_traits,ensemble_size=5,
                                              minimum_train_rows=40,minimum_test_rows=10)
 """
 The ensemble number must be increased to get more accurate results.

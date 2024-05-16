@@ -1,0 +1,6 @@
+__pycache__/
+venv*
+gm_dataset_Knauer_et_al_2022_aggregated.xlsx
+table_of_results.csv
+build/
+*.egg-info/
