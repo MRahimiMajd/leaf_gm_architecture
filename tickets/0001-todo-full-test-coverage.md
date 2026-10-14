@@ -4,7 +4,7 @@
 
 **Phases:**
 - [x] Phase 1 — this ticket
-- [ ] Phase 2 — switch on coverage measuring, record today's gaps
+- [x] Phase 2 — switch on coverage measuring, record today's gaps
 - [ ] Phase 3 — write tests until 100 %
 
 ## Goal
@@ -35,7 +35,12 @@ web app.
 ## Plan
 
 - **Setup (once):** a script `scripts/0001-setup-dev-environment.sh` creates a
-  clean Python 3.11 test environment.
+  clean Python 3.11 test environment using `uv`.
+- **Setup fix (2026-10-14):** with the pinned libraries, `pip install .`
+  resolved pyarrow 26 (pulled in by streamlit's `pyarrow>=7.0`), which needs
+  NumPy 2, but NumPy is pinned to 1.24.3, so even the existing tests failed
+  with an ImportError (no parquet engine). Pinned `pyarrow = ">=7.0,<15"` in
+  `pyproject.toml`.
 - **Phase 2:** switch on coverage measuring (including branches) in
   `pyproject.toml` and set the requirement to 100 %, so future test runs fail
    if coverage drops. Measure today's baseline and record the gaps here.
@@ -66,6 +71,19 @@ web app.
 - The tests must pass on the *current*, old library versions, because this
   ticket changes no program behavior. Ticket 0002 then re-runs them on the new
   versions.
+
+## Baseline (measured 2026-10-14, branch coverage switched on)
+
+Existing tests pass, gate fails at **31 %** (lines + branches):
+
+| file | line+branch coverage | main gaps |
+|---|---|---|
+| `functions.py` | 62 % | "not enough data" detours in `RF_with_split`/`RF_with_train_and_test_data`, `trait_pairs_correlation`, `CV_with_PFT_of_interest`, `cross_prediction_global_PFT_with_combination_of_interest`, `available_PFT_pairs`, `cross_prediction_PFT_PFT*`, skip-`continue` branches |
+| `streamlit_utils.py` | 0 % | nothing tested |
+| `streamlit_app.py` | 0 % | nothing tested |
+| `streamlit_crossval.py` | 0 % | nothing tested |
+| `streamlit_crosspred_global_pft.py` | 0 % | nothing tested |
+| `streamlit_crosspred_pft_pft.py` | 0 % | nothing tested |
 
 ## Done when
 
