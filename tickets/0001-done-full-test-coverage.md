@@ -1,6 +1,6 @@
 # Ticket 0001 — Full test coverage before the library update
 
-**Status:** todo (drafted 2026-10-14)
+**Status:** done (drafted 2026-10-14, finished 2026-10-14)
 
 **Phases:**
 - [x] Phase 1 — this ticket
