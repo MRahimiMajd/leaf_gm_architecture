@@ -11,7 +11,7 @@ from tests.conftest import (
 )
 
 
-def test_crossval_page_aggregates_on_first_visit_then_trains_and_predicts(select_menu):
+def test_crossval_page_aggregates_on_first_visit_then_trains_and_predicts(seeded_random_forests, select_menu):
     """
     First visit without data in the session: the page must load and
     aggregate the raw Excel data itself. Then train a small model and
@@ -43,7 +43,7 @@ def test_crossval_page_aggregates_on_first_visit_then_trains_and_predicts(select
     assert any('Predicted gm value' in markdown.value for markdown in at.markdown)
 
 
-def test_crossval_page_standalone_aggregates_raw_data():
+def test_crossval_page_standalone_aggregates_raw_data(seeded_random_forests):
     """
     Opened as a standalone page (not through the app entry point), the
     page finds no session state and loads and aggregates the raw Excel
@@ -70,7 +70,7 @@ def test_crossval_page_standalone_aggregates_raw_data():
 
 @pytest.mark.filterwarnings("ignore:Degrees of freedom <= 0:RuntimeWarning")
 @pytest.mark.filterwarnings("ignore:invalid value encountered in scalar divide:RuntimeWarning")
-def test_crossval_page_with_ensemble_size_1_has_nan_error_columns(select_menu):
+def test_crossval_page_with_ensemble_size_1_has_nan_error_columns(seeded_random_forests, select_menu):
     """
     Visitors can choose an ensemble size of 1 today. With a single
     repeat there is nothing to average over, so the three error columns

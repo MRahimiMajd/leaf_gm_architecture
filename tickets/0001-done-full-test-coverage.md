@@ -1,14 +1,14 @@
 # Ticket 0001 — Full test coverage before the library update
 
-**Status:** reopened (flaky test found after the first completion;
-drafted and finished 2026-10-14)
+**Status:** done (drafted and finished 2026-10-14; reopened the same day
+for a flaky test, closed again after phases 4 and 5)
 
 **Phases:**
 - [x] Phase 1 — this ticket
 - [x] Phase 2 — switch on coverage measuring, record today's gaps
 - [x] Phase 3 — write tests until 100 %
 - [x] Phase 4 (reopened) — demonstrate the flaky test live (red)
-- [ ] Phase 5 (reopened) — pin the randomness in the tests (green)
+- [x] Phase 5 (reopened) — pin the randomness in the tests (green)
 
 ## Goal
 
@@ -223,6 +223,25 @@ one:
 (Technical note: single-test runs cannot reach the 100 % coverage gate, so
 pytest exits non-zero even when the test passes; the runs above were
 counted by the summary line, not the exit code.)
+
+### Phase 5 (green): the randomness is pinned
+
+`tests/conftest.py` gained a `seeded_random_forests` fixture that
+monkeypatches the module-level names `gm.train_test_split` and
+`gm.RandomForestRegressor` so they force `random_state=1` (the seed
+verified clean for every dataset the tests use). Applied to all six
+tests that train forests: the app menu test, the three Cross Validation
+page tests and the two Cross Prediction page tests. No production code
+changed, and no warning filter was added.
+
+Evidence:
+
+- Full suite: **30 passed, 1 xfailed**, coverage gate reports
+  **100.00 %** for lines and branches, in 2 min 54 s — with the
+  warnings-as-errors tripwire still active.
+- The two tests that hit the 10-row real mosses data, repeated 5 times
+  in fresh pytest processes (coverage off for speed, which is why the
+  full-suite run above is the coverage evidence): **5 × 2 passed**.
 
 ## Glossary
 

@@ -25,7 +25,7 @@ def configure_widgets(at):
     widget_by_label(at.number_input, 'Minimum Test Rows').set_value(3)
 
 
-def test_crosspred_global_pft_page_trains_and_shows_detailed_analysis(select_menu):
+def test_crosspred_global_pft_page_trains_and_shows_detailed_analysis(seeded_random_forests, select_menu):
     at = make_app()
     seed_session_state(at)
     select_menu(PageNames.CROSSPRED_GLOBAL_PFT.value)

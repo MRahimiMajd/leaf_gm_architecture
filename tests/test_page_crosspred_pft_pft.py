@@ -33,7 +33,7 @@ def configure_widgets(at):
     widget_by_label(at.number_input, 'Minimum Test Rows').set_value(3)
 
 
-def test_crosspred_pft_pft_page_trains_and_shows_detailed_analysis(select_menu):
+def test_crosspred_pft_pft_page_trains_and_shows_detailed_analysis(seeded_random_forests, select_menu):
     get_PFT_PFT_comb_interest_results.clear()  # isolate from other tests
     at = make_app()
     seed_session_state(at)

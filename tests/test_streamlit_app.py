@@ -10,7 +10,7 @@ def test_importing_the_app_does_not_start_it():
     import leaf_gm_architecture.streamlit_app  # noqa: F401
 
 
-def test_app_menu_simulation_and_about_page(select_menu):
+def test_app_menu_simulation_and_about_page(seeded_random_forests, select_menu):
     """
     Visit all four pages of the app in one browser session, simulating
     the menu clicks. The first visit loads the real datasets. The later
