@@ -7,7 +7,7 @@ drafted and finished 2026-10-14)
 - [x] Phase 1 — this ticket
 - [x] Phase 2 — switch on coverage measuring, record today's gaps
 - [x] Phase 3 — write tests until 100 %
-- [ ] Phase 4 (reopened) — demonstrate the flaky test live (red)
+- [x] Phase 4 (reopened) — demonstrate the flaky test live (red)
 - [ ] Phase 5 (reopened) — pin the randomness in the tests (green)
 
 ## Goal
@@ -195,6 +195,34 @@ no code changed in between:
 - **Done when:** the full suite passes with 100 % line and branch coverage,
   no warning filters were added, and the two tests that hit the 10-row real
   mosses data pass several repeated runs in a row.
+
+### Phase 4 (red): the flake, caught live
+
+Running the single flaky test repeatedly until it failed
+(`python -m pytest tests/test_streamlit_app.py::
+test_app_menu_simulation_and_about_page`, 15 fresh pytest processes,
+default configuration):
+
+    run 1:  1 passed     run 6:  1 passed    run 11: 1 passed
+    run 2:  1 passed     run 7:  1 passed    run 12: 1 passed
+    run 3:  1 passed     run 8:  1 passed    run 13: 1 passed
+    run 4:  1 failed     run 9:  1 passed    run 14: 1 failed
+    run 5:  1 passed     run 10: 1 passed    run 15: 1 passed
+
+**2 of 15 runs failed (13 %)**, matching the ~17 % measured in the
+reproduction loop. The captured failure (run 4) is exactly the reported
+one:
+
+    tests/test_streamlit_app.py:40: AssertionError
+    E       assert not ElementList(_list=[Exception(message='An input array
+    is constant; the correlation coefficient is not defined.', ...
+    2026-10-14 14:26:13.914 Uncaught app exception
+    scipy.stats._warnings_errors.ConstantInputWarning: An input array is
+    constant; the correlation coefficient is not defined.
+
+(Technical note: single-test runs cannot reach the 100 % coverage gate, so
+pytest exits non-zero even when the test passes; the runs above were
+counted by the summary line, not the exit code.)
 
 ## Glossary
 
