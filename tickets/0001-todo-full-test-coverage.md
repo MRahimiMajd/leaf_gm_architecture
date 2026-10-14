@@ -5,7 +5,7 @@
 **Phases:**
 - [x] Phase 1 — this ticket
 - [x] Phase 2 — switch on coverage measuring, record today's gaps
-- [ ] Phase 3 — write tests until 100 %
+- [x] Phase 3 — write tests until 100 %
 
 ## Goal
 
@@ -71,6 +71,14 @@ web app.
 - The tests must pass on the *current*, old library versions, because this
   ticket changes no program behavior. Ticket 0002 then re-runs them on the new
   versions.
+- **Found while covering the "not enough data" detours:** `RF_with_split`
+  (functions.py) crashes with an `UnboundLocalError` instead of returning the
+  NaN result, because `model` is never assigned in that branch
+  (`RF_with_train_and_test_data` sets `model = None` correctly). Reachable
+  from the Cross Validation page when a visitor sets "Minimum Rows" higher
+  than the available data (defaults avoid it; PFT-PFT page even handles
+  `model = None` explicitly). Decision (2026-10-14): ticket 0001 only
+  documents the current behavior in a test; the fix belongs in ticket 0006.
 
 ## Baseline (measured 2026-10-14, branch coverage switched on)
 
@@ -84,6 +92,43 @@ Existing tests pass, gate fails at **31 %** (lines + branches):
 | `streamlit_crossval.py` | 0 % | nothing tested |
 | `streamlit_crosspred_global_pft.py` | 0 % | nothing tested |
 | `streamlit_crosspred_pft_pft.py` | 0 % | nothing tested |
+
+## Result (2026-10-14, phase 3)
+
+`pytest` reports **100 % line coverage and 100 % branch coverage** for
+`src/leaf_gm_architecture/`, 31 tests pass warning-free in about 3 minutes
+(on Python 3.11.10 with the pinned library versions). Any *new* warning
+fails the suite, so the library update in ticket 0002 will surface changed
+behavior immediately.
+
+New test files:
+
+| file | what it tests |
+|---|---|
+| `tests/test_functions_helpers.py` | all untested routines of `functions.py`, including the "not enough data" detours and the skip-`continue` branches (train/test sets crafted so both directions of every decision are taken) |
+| `tests/test_streamlit_utils.py` | `PageNames`, the two dataset loaders, `dict_to_tables` with and without importances |
+| `tests/test_streamlit_app.py` | visits all four pages in one session with simulated menu clicks; plus the import guard |
+| `tests/test_page_crossval.py` | Cross Validation page: first visit aggregates the raw data, training + single-value prediction, a standalone visit (no session state), and the dedicated ensemble-size-1 test (NaN error columns) |
+| `tests/test_page_crosspred_global_pft.py` | Cross Prediction global-PFT page: trained models, empty detailed analysis, no trainable data |
+| `tests/test_page_crosspred_pft_pft.py` | Cross Prediction PFT-PFT page: trained models, detailed analysis, no trainable data, and the "model could not be trained" error message (training stubbed, since the synthetic data can always train) |
+| `tests/conftest.py` | shared helpers: app starter, simulated menu clicks, small synthetic datasets |
+
+Two technical hurdles worth remembering:
+
+- Coverage must be given the folder as a *path* (`--cov=src/leaf_gm_architecture`),
+  not as a package name: the test browser executes `streamlit_app.py` as a
+  script (`__main__`), which coverage cannot attribute to a package name.
+- The Cross Validation page has a first-visit branch that loads and aggregates
+  the raw Excel data itself. It is unreachable through the normal app flow
+  (the entry point always fills the session state first), so one test opens
+  the page standalone to cover it.
+
+The 100 % requirement is enforced by the pytest configuration itself
+(`--cov-fail-under=100`), so the existing GitHub Actions check enforces it
+automatically. One workflow change was needed: it now installs the app
+*editable* (`pip install -e .`), because a regular install copies the package
+into site-packages, where the coverage gate (which measures `src/`) cannot
+see it.
 
 ## Done when
 

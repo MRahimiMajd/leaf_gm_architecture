@@ -30,8 +30,15 @@ dev = []
 [tool.pytest.ini_options]
 # every test run must report 100 % line and branch coverage
 # for the web app package (src/leaf_gm_architecture), so that a dropped
-# test or a new untested line fails the test suite.
-addopts = "--cov=leaf_gm_architecture --cov-report=term-missing --cov-fail-under=100"
+# test or a new untested line fails the test suite. The folder is given
+# as a path (not as a package name) because Streamlit's test browser
+# executes streamlit_app.py as a script ("__main__"), which coverage
+# cannot attribute to the package name.
+addopts = "--cov=src/leaf_gm_architecture --cov-report=term-missing --cov-fail-under=100"
+# any warning that is not explicitly ignored (see the test that records
+# the ensemble-size-1 NaN columns) fails the suite, so that the library
+# update in ticket 0002 surfaces new warnings immediately
+filterwarnings = ["error"]
 
 [tool.coverage.run]
 branch = true  # measure if/else decisions in both directions
