@@ -67,3 +67,19 @@ def test_app_menu_simulation_and_about_page(seeded_random_forests, select_menu):
     assert not at.exception
     assert any('There are no trained models because of data availability!' in markdown.value
                for markdown in at.markdown)
+
+
+def test_app_runs_with_the_real_menu():
+    """
+    All other tests simulate the menu, because the test browser cannot
+    click it (it is a third-party component). This test runs the app
+    once with the real menu add-on instead, so that its compatibility
+    with the current Streamlit version is checked on every test run
+    (ticket 0002). The menu stays on its default entry, the About page.
+    """
+    at = make_app()
+    at.run()
+    assert not at.exception
+    component_elements = [element for element in at.main
+                          if element.type == 'component_instance']
+    assert len(component_elements) == 1

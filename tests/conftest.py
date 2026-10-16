@@ -1,3 +1,8 @@
+import socket
+import subprocess
+import sys
+import time
+import urllib.request
 from pathlib import Path
 
 import numpy as np
@@ -47,6 +52,53 @@ def make_app():
     # generous timeout, because training the random forests can take a
     # while on a busy machine (e.g. in CI)
     return AppTest.from_file(str(APP_FILE), default_timeout=300)
+
+
+@pytest.fixture(scope='session')
+def streamlit_server():
+    """
+    Start the web app in a real, headless Streamlit server and wait until it
+    answers. Used by the HTTP smoke test and the browser menu test.
+    The server runs with the repository root as working directory, because
+    the app loads its dataset files by name from there.
+    """
+    repo_root = Path(__file__).resolve().parent.parent
+    with socket.socket() as port_finder:
+        port_finder.bind(('127.0.0.1', 0))
+        port = port_finder.getsockname()[1]
+    base_url = f'http://127.0.0.1:{port}'
+
+    server = subprocess.Popen(
+        [sys.executable, '-m', 'streamlit', 'run', str(APP_FILE),
+         '--server.headless', 'true', '--server.address', '127.0.0.1',
+         '--server.port', str(port)],
+        cwd=repo_root, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
+        text=True)
+
+    def stopped_server_output():
+        return server.communicate(timeout=15)[0]
+
+    try:
+        for _ in range(60):
+            if server.poll() is not None:
+                raise RuntimeError(
+                    'the streamlit server stopped during startup:\n'
+                    + stopped_server_output())
+            try:
+                with urllib.request.urlopen(f'{base_url}/_stcore/health',
+                                            timeout=1) as response:
+                    if response.read() == b'ok':
+                        break
+            except OSError:
+                pass
+            time.sleep(1)
+        else:
+            raise RuntimeError('the streamlit server did not become '
+                               'healthy within 60 s')
+        yield base_url
+    finally:
+        server.terminate()
+        server.communicate(timeout=15)
 
 
 @pytest.fixture

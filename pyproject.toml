@@ -23,9 +23,12 @@ streamlit_option_menu = "0.3.12"
 pyarrow = ">=7.0,<15"
 pytest = "^8.0"
 pytest-cov = "^7.0"
+# browser tests only (install with the "dev" extra). The deployed app
+# must not carry a browser driver, so it stays out of the base install.
+playwright = { version = "^1.64", optional = true }
 
 [tool.poetry.extras]
-dev = []
+dev = ["playwright"]
 
 [tool.pytest.ini_options]
 # every test run must report 100 % line and branch coverage
