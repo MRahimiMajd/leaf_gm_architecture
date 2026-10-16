@@ -1,11 +1,12 @@
 # Ticket 0002 — Update Streamlit so the app comes back online
 
-**Status:** in progress (drafted 2026-10-14)
+**Status:** done in the repository, but still needs to be merged into
+Milads repo and deployed.
 
 **Phases:**
 - [x] Phase 1 — this ticket
 - [x] Phase 2 — version bump, record what breaks
-- [ ] Phase 3 — minimal fixes, smoke test, pull request
+- [x] Phase 3 — minimal fixes, smoke test, pull request
 
 ## Goal
 
@@ -53,6 +54,49 @@ What changed in the environment:
 Known blind spot: the test browser only *simulates* the menu choice
 (`tests/conftest.py`). We should add Playwright test to verify it keeps
 working.
+
+## Phase 3 result (2026-10-16): no fixes needed — and the menu is now really tested
+
+The expected breakage did not happen, so `src/` stayed untouched: this
+ticket changes **zero lines of production code**. The phase's scope grew
+by decision (review of phase 2): the suite now also proves that the menu
+add-on really works, in three new layers:
+
+1. **Unmocked test-browser run** (`test_app_runs_with_the_real_menu`):
+   the app runs with the real menu add-on's Python side. Before, every
+   test simulated the menu, so only its import was ever real.
+2. **HTTP smoke test** (`tests/test_app_server.py`): a real headless
+   Streamlit server (session fixture in `conftest.py`) answers on its
+   health endpoint and serves the start page. Worth its own check
+   because the update also replaced the server technology
+   (tornado → uvicorn).
+3. **Real-browser menu test** (`tests/test_menu_browser.py`): headless
+   Chromium clicks 'Cross Validation' in the real menu and then back to
+   'About'. This is the only test that exercises the menu exactly like a
+   visitor does — the strongest available proof short of the live app.
+
+New dev-only dependency: `playwright` (`^1.64`, optional, in the "dev"
+extra of `pyproject.toml`) plus a user-level headless Chromium download
+(~120 MB). Deliberately kept out of the base install: the hosting
+service stopped the app for memory overuse, so the deployment stays
+lean — the browser tooling is for development and CI only. New setup
+script: `scripts/0002-install-browser-test-dependencies.sh`.
+
+The pinned `streamlit_option_menu = "0.3.12"` stays: the real-browser
+test proves rendering and clicks work on Streamlit 1.65.0, so the hurdle
+from the plan is cleared without updating the add-on.
+
+Evidence:
+
+    33 passed, 1 xfailed in 317.56s (0:05:17)
+    coverage: 100.00 % lines and branches, warnings-as-errors silent
+
+The GitHub Actions workflow now installs the dev extra and headless
+Chromium, so all three new layers also run on every pull request.
+
+Remaining after the merge (hosting side, manual): the live app at
+https://leaf-gm-architecture-bioinformatics-potsdam.streamlit.app/ must
+show its normal pages again.
 
 ## Hurdles & risks
 
