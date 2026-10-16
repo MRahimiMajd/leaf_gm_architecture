@@ -28,8 +28,12 @@ jobs:
         python -m pip install --upgrade pip
         # editable install, so that the tests measure coverage of the
         # sources in src/ (a regular install would copy the package into
-        # site-packages, where the coverage gate cannot see it)
-        pip install -e .
+        # site-packages, where the coverage gate cannot see it).
+        # The "dev" extra adds playwright, the driver of the
+        # real-browser menu test.
+        pip install -e ".[dev]"
+    - name: Install headless Chromium for the browser menu test
+      run: playwright install --with-deps chromium
     - name: Test with pytest
       run: |
         pytest
